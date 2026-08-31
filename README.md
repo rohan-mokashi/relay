@@ -63,7 +63,8 @@ dependency audit.
 
 - Codex: connect directly to the authenticated loopback Streamable HTTP server. See
   [docs/setup-windows.md](docs/setup-windows.md#connect-codex).
-- ChatGPT Work: use Secure MCP Tunnel with the trusted stdio entry point. See
+- ChatGPT Work: use Secure MCP Tunnel with the trusted stdio entry point. The Windows runbook
+  includes a checksum-verifying, repository-local installer for the public tunnel client. See
   [docs/setup-windows.md](docs/setup-windows.md#connect-chatgpt-work-through-secure-mcp-tunnel).
 - Plugin package: the current local package is in [plugin/relay](plugin/relay). Registration and
   the intentional absence of a fabricated `.app.json` are explained in

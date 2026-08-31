@@ -15,8 +15,9 @@ single-user proof of concept.
 - Node.js 24 LTS.
 - pnpm 11.
 - Codex CLI or the ChatGPT desktop app for the Codex-side connection.
-- For the ChatGPT Work leg: `tunnel-client`, a runtime API key, a `tunnel_id`, Tunnels Read + Use,
-  association to the target ChatGPT workspace, and ChatGPT developer-mode access.
+- For the ChatGPT Work leg: a runtime API key, a `tunnel_id`, Tunnels Read + Use, association to
+  the target ChatGPT workspace, and ChatGPT developer-mode access. The repository can install the
+  public `tunnel-client` release locally as described below.
 
 Official references:
 
@@ -122,12 +123,14 @@ variable for plugin-based Codex testing.
 
 ## Connect ChatGPT Work through Secure MCP Tunnel
 
-This step requires external credentials and workspace authorization. Download `tunnel-client`
-from the Platform tunnel settings page or the latest official release, then check the installed
-binary rather than assuming a version:
+This step requires external credentials and workspace authorization. The helper below follows the
+official latest-release path, selects the current Windows architecture, verifies the
+release-provided SHA-256 digest before extraction, and installs only under the ignored `.tools`
+directory. It does not alter global `PATH`:
 
 ```powershell
-tunnel-client help quickstart
+$relayTunnelClient = & '.\scripts\install-tunnel-client.ps1' -PassThru
+& $relayTunnelClient help quickstart
 ```
 
 From the repository root, use a secure prompt for the runtime API key and enter the real tunnel
@@ -141,9 +144,9 @@ $relayCredential = [System.Management.Automation.PSCredential]::new('relay', $re
 $env:CONTROL_PLANE_API_KEY = $relayCredential.GetNetworkCredential().Password
 $relayMcpCommand = 'pnpm --dir "' + $relayRepo + '" start:stdio'
 
-tunnel-client init --sample sample_mcp_stdio_local --profile relay-local-stdio --tunnel-id $relayTunnelId --mcp-command $relayMcpCommand
-tunnel-client doctor --profile relay-local-stdio --explain
-tunnel-client run --profile relay-local-stdio
+& $relayTunnelClient init --sample sample_mcp_stdio_local --profile relay-local-stdio --tunnel-id $relayTunnelId --mcp-command $relayMcpCommand
+& $relayTunnelClient doctor --profile relay-local-stdio --explain
+& $relayTunnelClient run --profile relay-local-stdio
 ```
 
 Keep terminal C running. The stdio process loads the same `.env`; therefore

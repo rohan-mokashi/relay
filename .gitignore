@@ -2,6 +2,7 @@ node_modules/
 .pnpm/
 .pnpm-store/
 .npm-cache/
+.tools/
 dist/
 coverage/
 .data/
