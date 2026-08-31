@@ -1,0 +1,15 @@
+node_modules/
+.pnpm/
+.pnpm-store/
+.npm-cache/
+dist/
+coverage/
+.data/
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.*
+!.env.example
+*.log
+test-results/

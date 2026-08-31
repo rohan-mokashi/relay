@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false
+  },
+  "include": ["apps/mcp-server/src/**/*.ts", "packages/*/src/**/*.ts", "scripts/migrate.ts"],
+  "exclude": ["**/*.test.ts", "**/tests/**"]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Explicit, auditable project-context handoffs between ChatGPT Work and Codex over MCP.",
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24.0.0 <25",
+    "pnpm": ">=11.0.0 <12"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch apps/mcp-server/src/index.ts",
+    "start": "node dist/apps/mcp-server/src/index.js",
+    "start:http": "tsx apps/mcp-server/src/index.ts",
+    "start:stdio": "tsx apps/mcp-server/src/stdio.ts",
+    "migrate": "tsx scripts/migrate.ts",
+    "migrate:check": "tsx scripts/check-migrations.ts",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:contract": "vitest run --project contract",
+    "test:security": "vitest run --project security",
+    "test:e2e": "vitest run --project e2e",
+    "plugin:check": "node scripts/check-plugin.mjs",
+    "secret:scan": "node scripts/secret-scan.mjs",
+    "audit": "pnpm audit --audit-level high",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "better-sqlite3": "13.0.3",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.11",
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "24.13.3",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11"
+  }
+}

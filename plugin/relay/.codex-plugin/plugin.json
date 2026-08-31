@@ -1,0 +1,22 @@
+{
+  "name": "relay",
+  "version": "0.1.0",
+  "description": "Explicit, durable project-context handoffs between ChatGPT Work and Codex.",
+  "author": {
+    "name": "Relay contributors"
+  },
+  "interface": {
+    "displayName": "Relay",
+    "shortDescription": "Share explicit project context across agent surfaces.",
+    "longDescription": "Create and retrieve durable project handoffs and implementation checkpoints without copying full transcripts or exposing private memory stores.",
+    "developerName": "Relay contributors",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Show my Relay projects.",
+      "Retrieve the latest context for relay-bootstrap.",
+      "Create a durable handoff for Codex from the project details I explicitly provide."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}
