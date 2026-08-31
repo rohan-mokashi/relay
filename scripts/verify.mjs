@@ -1,6 +1,11 @@
 import { spawnSync } from "node:child_process";
 
-const executable = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+// Reuse the package-manager entry point that launched this script. Spawning a
+// Windows .cmd shim directly is not supported consistently across Node builds.
+const packageManagerEntry = process.env.npm_execpath;
+if (!packageManagerEntry) {
+  throw new Error("Run this verifier through `pnpm verify`.");
+}
 const checks = [
   "lint",
   "format:check",
@@ -15,7 +20,7 @@ const checks = [
 
 for (const check of checks) {
   process.stdout.write(`\n==> pnpm ${check}\n`);
-  const result = spawnSync(executable, [check], {
+  const result = spawnSync(process.execPath, [packageManagerEntry, check], {
     cwd: process.cwd(),
     stdio: "inherit",
     shell: false,
