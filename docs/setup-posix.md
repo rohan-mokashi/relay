@@ -43,16 +43,27 @@ permissions first. Then follow the current
 
 ```sh
 export CONTROL_PLANE_API_KEY='<load-from-your-secret-manager>'
+export RELAY_TUNNEL_PROFILE_DIR="$PWD/.tools/tunnel-client-profiles"
+export RELAY_TUNNEL_HEALTH_URL_FILE="$RELAY_TUNNEL_PROFILE_DIR/relay-local-stdio-health.url"
 tunnel-client help quickstart
 tunnel-client init \
   --sample sample_mcp_stdio_local \
   --profile relay-local-stdio \
+  --profile-dir "$RELAY_TUNNEL_PROFILE_DIR" \
   --tunnel-id '<your-tunnel-id>' \
-  --mcp-command "pnpm --dir '$PWD' start:stdio"
-tunnel-client doctor --profile relay-local-stdio --explain
-tunnel-client run --profile relay-local-stdio
+  --mcp-command "pnpm --dir '$PWD' start:stdio" \
+  --health-listen-addr '127.0.0.1:0'
+tunnel-client doctor \
+  --profile relay-local-stdio \
+  --profile-dir "$RELAY_TUNNEL_PROFILE_DIR" \
+  --explain
+tunnel-client run \
+  --profile relay-local-stdio \
+  --profile-dir "$RELAY_TUNNEL_PROFILE_DIR" \
+  --health.url-file "$RELAY_TUNNEL_HEALTH_URL_FILE"
 ```
 
 Keep the tunnel running and use the ChatGPT developer-mode steps in the
 [Windows runbook](setup-windows.md#connect-chatgpt-work-through-secure-mcp-tunnel). Environment
-variables are development secrets; do not commit them or paste them into Relay capsules.
+variables are development secrets; do not commit them or paste them into Relay capsules. The
+profile and resolved health URL stay under the repository's ignored `.tools` directory.

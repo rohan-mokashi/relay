@@ -143,15 +143,19 @@ $relaySecureApiKey = Read-Host 'Tunnel runtime API key' -AsSecureString
 $relayCredential = [System.Management.Automation.PSCredential]::new('relay', $relaySecureApiKey)
 $env:CONTROL_PLANE_API_KEY = $relayCredential.GetNetworkCredential().Password
 $relayMcpCommand = 'pnpm --dir "' + $relayRepo + '" start:stdio'
+$relayProfileDir = Join-Path $relayRepo '.tools\tunnel-client-profiles'
+$relayHealthUrlFile = Join-Path $relayProfileDir 'relay-local-stdio-health.url'
 
-& $relayTunnelClient init --sample sample_mcp_stdio_local --profile relay-local-stdio --tunnel-id $relayTunnelId --mcp-command $relayMcpCommand
-& $relayTunnelClient doctor --profile relay-local-stdio --explain
-& $relayTunnelClient run --profile relay-local-stdio
+& $relayTunnelClient init --sample sample_mcp_stdio_local --profile relay-local-stdio --profile-dir $relayProfileDir --tunnel-id $relayTunnelId --mcp-command $relayMcpCommand --health-listen-addr '127.0.0.1:0'
+& $relayTunnelClient doctor --profile relay-local-stdio --profile-dir $relayProfileDir --explain
+& $relayTunnelClient run --profile relay-local-stdio --profile-dir $relayProfileDir --health.url-file $relayHealthUrlFile
 ```
 
 Keep terminal C running. The stdio process loads the same `.env`; therefore
 `RELAY_TUNNEL_PRINCIPAL` must exactly equal `RELAY_DEV_PRINCIPAL`, and
 `RELAY_DATABASE_PATH` must be the same absolute file used by the HTTP server.
+The profile and resolved health URL stay under the repository's ignored `.tools` directory; the
+runtime key remains only in `CONTROL_PLANE_API_KEY`.
 
 In ChatGPT:
 
