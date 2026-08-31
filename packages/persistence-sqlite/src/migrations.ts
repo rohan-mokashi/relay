@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
+import type { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
-import type Database from "better-sqlite3";
 
 const sourceMigrationDirectory = fileURLToPath(new URL("../migrations", import.meta.url));
 
@@ -17,7 +17,7 @@ export const resolveMigrationDirectory = (configured?: string): string => {
   return selected;
 };
 
-export const applyMigrations = (database: Database.Database, migrationDirectory?: string): void => {
+export const applyMigrations = (database: DatabaseSync, migrationDirectory?: string): void => {
   database.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version TEXT PRIMARY KEY,
@@ -37,12 +37,16 @@ export const applyMigrations = (database: Database.Database, migrationDirectory?
     if (alreadyApplied) continue;
 
     const sql = readFileSync(resolve(directory, file), "utf8");
-    const migrate = database.transaction(() => {
+    database.exec("BEGIN IMMEDIATE");
+    try {
       database.exec(sql);
       database
         .prepare("INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)")
         .run(file, new Date().toISOString());
-    });
-    migrate.immediate();
+      database.exec("COMMIT");
+    } catch (error) {
+      database.exec("ROLLBACK");
+      throw error;
+    }
   }
 };

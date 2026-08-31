@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import Database from "better-sqlite3";
+import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import {
   ArtifactSchema,
   CheckpointSchema,
@@ -130,7 +130,7 @@ const decodeCursor = (
 const escapeLike = (value: string): string => value.replace(/[\\%_]/g, "\\$&");
 
 export class SqliteRelayRepository implements RelayRepository {
-  private readonly database: Database.Database;
+  private readonly database: DatabaseSync;
   private failAuditWrites: boolean;
   private readonly migrationDirectory?: string;
 
@@ -141,21 +141,21 @@ export class SqliteRelayRepository implements RelayRepository {
     if (databasePath !== ":memory:") {
       mkdirSync(dirname(resolve(databasePath)), { recursive: true });
     }
-    this.database = new Database(databasePath);
-    this.database.pragma("foreign_keys = ON");
-    this.database.pragma("busy_timeout = 5000");
-    if (databasePath !== ":memory:") this.database.pragma("journal_mode = WAL");
+    this.database = new DatabaseSync(databasePath);
+    this.database.exec("PRAGMA foreign_keys = ON");
+    this.database.exec("PRAGMA busy_timeout = 5000");
+    if (databasePath !== ":memory:") this.database.exec("PRAGMA journal_mode = WAL");
     this.failAuditWrites = options.failAuditWrites ?? false;
     this.migrationDirectory = options.migrationDirectory;
   }
 
   migrate(): void {
     applyMigrations(this.database, this.migrationDirectory);
-    this.database.pragma("foreign_keys = ON");
+    this.database.exec("PRAGMA foreign_keys = ON");
   }
 
   close(): void {
-    if (this.database.open) this.database.close();
+    if (this.database.isOpen) this.database.close();
   }
 
   setFailAuditWritesForTesting(value: boolean): void {
@@ -163,7 +163,10 @@ export class SqliteRelayRepository implements RelayRepository {
   }
 
   diagnosticsForTesting(): { foreignKeys: boolean; tables: string[] } {
-    const foreignKeys = this.database.pragma("foreign_keys", { simple: true }) === 1;
+    const foreignKeyRow = this.database.prepare("PRAGMA foreign_keys").get() as
+      | { foreign_keys: number }
+      | undefined;
+    const foreignKeys = foreignKeyRow?.foreign_keys === 1;
     const tables = (
       this.database
         .prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
@@ -210,7 +213,7 @@ export class SqliteRelayRepository implements RelayRepository {
     now: string,
     operation: () => T,
   ): T {
-    const execute = this.database.transaction(() => {
+    return this.immediateTransaction(() => {
       const existing = this.database
         .prepare(
           `SELECT payload_hash, result_json
@@ -241,8 +244,18 @@ export class SqliteRelayRepository implements RelayRepository {
         .run(principalId, toolName, key, payloadHash, JSON.stringify(result), now);
       return result;
     });
+  }
 
-    return execute.immediate();
+  private immediateTransaction<T>(operation: () => T): T {
+    this.database.exec("BEGIN IMMEDIATE");
+    try {
+      const result = operation();
+      this.database.exec("COMMIT");
+      return result;
+    } catch (error) {
+      this.database.exec("ROLLBACK");
+      throw error;
+    }
   }
 
   private projectFromRow(row: ProjectRow): Project {
@@ -346,7 +359,7 @@ export class SqliteRelayRepository implements RelayRepository {
   listProjects(principalId: string, input: ListProjectsInput): Page<Project> {
     const cursor = decodeCursor(input.cursor, "projects");
     const clauses = ["m.principal_id = @principalId"];
-    const parameters: Record<string, unknown> = {
+    const parameters: Record<string, SQLInputValue> = {
       principalId,
       limit: input.limit + 1,
     };
@@ -386,7 +399,7 @@ export class SqliteRelayRepository implements RelayRepository {
          ORDER BY p.updated_at DESC, p.id DESC
          LIMIT @limit`,
       )
-      .all(parameters) as ProjectRow[];
+      .all(parameters) as unknown as ProjectRow[];
     const hasMore = rows.length > input.limit;
     const visible = rows.slice(0, input.limit);
     const last = visible.at(-1);
@@ -480,7 +493,7 @@ export class SqliteRelayRepository implements RelayRepository {
          WHERE a.project_id = ? AND m.principal_id = ? AND a.id IN (${placeholders})
          ORDER BY a.id`,
       )
-      .all(projectId, principalId, ...artifactIds) as ArtifactRow[];
+      .all(projectId, principalId, ...artifactIds) as unknown as ArtifactRow[];
     return rows.map((row) => this.artifactFromRow(row));
   }
 
@@ -498,7 +511,7 @@ export class SqliteRelayRepository implements RelayRepository {
          ORDER BY a.created_at DESC, a.id DESC
          LIMIT ?`,
       )
-      .all(projectId, principalId, limit) as ArtifactRow[];
+      .all(projectId, principalId, limit) as unknown as ArtifactRow[];
     return rows.map((row) => this.artifactFromRow(row));
   }
 
@@ -717,7 +730,7 @@ export class SqliteRelayRepository implements RelayRepository {
   listProjectHistory(principalId: string, input: ListProjectHistoryInput): Page<HistoryItem> {
     const cursor = decodeCursor(input.cursor, "history");
     const types = input.record_types ?? ["handoff", "checkpoint"];
-    const parameters: Record<string, unknown> = {
+    const parameters: Record<string, SQLInputValue> = {
       principalId,
       projectId: input.project_id,
       limit: input.limit + 1,
@@ -756,7 +769,7 @@ export class SqliteRelayRepository implements RelayRepository {
          ORDER BY created_at DESC, id DESC
          LIMIT @limit`,
       )
-      .all(parameters) as HistoryRow[];
+      .all(parameters) as unknown as HistoryRow[];
     const hasMore = rows.length > input.limit;
     const visible = rows.slice(0, input.limit);
     const last = visible.at(-1);

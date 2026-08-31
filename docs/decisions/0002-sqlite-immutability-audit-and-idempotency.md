@@ -11,7 +11,8 @@ path without prematurely introducing hosted infrastructure.
 ## Decision
 
 - Put a provider-neutral `RelayRepository` port behind the domain service.
-- Use SQLite 3 through `better-sqlite3` 13.0.3 for the local adapter.
+- Use the Node 24 standard-library `node:sqlite` API for the local adapter, avoiding a native
+  addon installation toolchain.
 - Enable foreign keys, a five-second busy timeout, and WAL for file databases.
 - Apply ordered SQL migrations and record each applied filename.
 - Scope slug uniqueness to the owning principal and require membership joins for all reads and

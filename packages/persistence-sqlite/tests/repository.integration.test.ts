@@ -1,5 +1,5 @@
-import Database from "better-sqlite3";
 import { once } from "node:events";
+import { DatabaseSync } from "node:sqlite";
 import { Worker } from "node:worker_threads";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
@@ -211,7 +211,7 @@ describe("SQLite Relay repository", () => {
     const checkpoint = system.service.createCheckpoint(principalA, checkpointInput(project.id));
     system.repository.close();
 
-    const database = new Database(system.databasePath);
+    const database = new DatabaseSync(system.databasePath);
     try {
       expect(() =>
         database
