@@ -4,6 +4,7 @@ import {
   CheckpointStatusSchema,
   CreateCheckpointInputSchema,
   CreateHandoffInputSchema,
+  HandoffSourceSchema,
   LIMITS,
   UpsertProjectInputSchema,
 } from "../src/index.js";
@@ -36,6 +37,27 @@ describe("Relay contracts", () => {
       CreateHandoffInputSchema.safeParse({
         ...valid,
         constraints: Array.from({ length: LIMITS.arrayItems + 1 }, () => "bounded"),
+      }).success,
+    ).toBe(false);
+  });
+
+  it("limits handoff source URLs to HTTP(S)", () => {
+    expect(
+      HandoffSourceSchema.safeParse({
+        surface: "chatgpt_work",
+        conversation_url: "https://chatgpt.com/c/relay-bootstrap",
+      }).success,
+    ).toBe(true);
+    expect(
+      HandoffSourceSchema.safeParse({
+        surface: "chatgpt_work",
+        conversation_url: "javascript:alert(1)",
+      }).success,
+    ).toBe(false);
+    expect(
+      HandoffSourceSchema.safeParse({
+        surface: "chatgpt_work",
+        conversation_url: "file:///private/chat.txt",
       }).success,
     ).toBe(false);
   });

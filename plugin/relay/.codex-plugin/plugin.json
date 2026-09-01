@@ -18,5 +18,6 @@
       "Create a durable handoff for Codex from the project details I explicitly provide."
     ]
   },
-  "mcpServers": "./.mcp.json"
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json"
 }

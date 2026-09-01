@@ -81,6 +81,15 @@ const MetadataValueSchema = z.union([
   z.null(),
 ]);
 
+const isHttpUrl = (value: string): boolean => {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
 export const ArtifactMetadataSchema = z
   .record(z.string().min(1).max(80), MetadataValueSchema)
   .superRefine((value, context) => {
@@ -121,17 +130,12 @@ export const ArtifactDefinitionSchema = z
   })
   .strict()
   .superRefine((value, context) => {
-    if (value.kind === "url") {
-      try {
-        const parsed = new URL(value.uri);
-        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error();
-      } catch {
-        context.addIssue({
-          code: "custom",
-          path: ["uri"],
-          message: "URL artifacts require HTTP(S)",
-        });
-      }
+    if (value.kind === "url" && !isHttpUrl(value.uri)) {
+      context.addIssue({
+        code: "custom",
+        path: ["uri"],
+        message: "URL artifacts require HTTP(S)",
+      });
     }
     if (value.kind === "repo_path" && !safeRepositoryUri(value.uri)) {
       context.addIssue({
@@ -145,7 +149,13 @@ export const ArtifactDefinitionSchema = z
 export const HandoffSourceSchema = z
   .object({
     surface: SourceSurfaceSchema,
-    conversation_url: z.string().url().max(LIMITS.sourceReference).nullable().optional(),
+    conversation_url: z
+      .string()
+      .trim()
+      .max(LIMITS.sourceReference)
+      .refine(isHttpUrl, "Source conversation URLs require HTTP(S)")
+      .nullable()
+      .optional(),
     label: optionalBoundedText(LIMITS.sourceLabel),
   })
   .strict();
