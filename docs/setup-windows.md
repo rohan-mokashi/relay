@@ -142,7 +142,8 @@ $relayTunnelId = Read-Host 'Tunnel ID'
 $relaySecureApiKey = Read-Host 'Tunnel runtime API key' -AsSecureString
 $relayCredential = [System.Management.Automation.PSCredential]::new('relay', $relaySecureApiKey)
 $env:CONTROL_PLANE_API_KEY = $relayCredential.GetNetworkCredential().Password
-$relayMcpCommand = 'pnpm --dir "' + $relayRepo + '" start:stdio'
+$relayRepoForCommand = $relayRepo.Replace('\', '/')
+$relayMcpCommand = 'pnpm --dir "' + $relayRepoForCommand + '" start:stdio'
 $relayProfileDir = Join-Path $relayRepo '.tools\tunnel-client-profiles'
 $relayHealthUrlFile = Join-Path $relayProfileDir 'relay-local-stdio-health.url'
 
