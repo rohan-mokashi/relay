@@ -6,9 +6,9 @@ submits. It does not read chats, synchronize private memories, control Codex, ru
 commands, or fetch artifact URLs.
 
 The local implementation is complete and covered by unit, integration, MCP contract, security,
-and real-transport end-to-end tests. A real ChatGPT Work acceptance run still requires the
-operator's OpenAI tunnel credential, `tunnel_id`, workspace association, and developer-mode
-permission.
+and real-transport end-to-end tests. The real ChatGPT Work → Codex → ChatGPT Work acceptance run
+has also passed. Repeating that external run requires the operator's OpenAI tunnel credential,
+`tunnel_id`, workspace association, and developer-mode permission.
 
 ## Architecture
 
@@ -67,7 +67,7 @@ dependency audit.
   includes a checksum-verifying, repository-local installer for the public tunnel client. See
   [docs/setup-windows.md](docs/setup-windows.md#connect-chatgpt-work-through-secure-mcp-tunnel).
 - Plugin package: the current local package is in [plugin/relay](plugin/relay). Registration and
-  the intentional absence of a fabricated `.app.json` are explained in
+  the real non-secret `.app.json` connection mapping are explained in
   [plugin/relay/README.md](plugin/relay/README.md).
 
 The manual three-surface proof is in
