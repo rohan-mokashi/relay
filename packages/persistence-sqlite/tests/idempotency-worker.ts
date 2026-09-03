@@ -15,9 +15,9 @@ const service = new RelayService(repository);
 const port = parentPort;
 if (!port) throw new Error("Idempotency worker requires a parent port.");
 port.postMessage({ kind: "ready" });
-port.once("message", () => {
+port.once("message", async () => {
   try {
-    const result = service.upsertProject(
+    const result = await service.upsertProject(
       { principalRef: "principal-a", requestId: input.requestId },
       projectInput(),
     );

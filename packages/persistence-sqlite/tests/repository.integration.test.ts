@@ -47,19 +47,19 @@ describe("SQLite Relay repository", () => {
     );
   });
 
-  it("returns the original result for an identical mutation retry", () => {
+  it("returns the original result for an identical mutation retry", async () => {
     const input = projectInput();
-    const first = system.service.upsertProject(principalA, input);
-    const replay = system.service.upsertProject(principalA, input);
+    const first = await system.service.upsertProject(principalA, input);
+    const replay = await system.service.upsertProject(principalA, input);
     expect(replay).toEqual(first);
     expect(system.repository.countRowsForTesting("projects")).toBe(1);
     expect(system.repository.countRowsForTesting("audit_events")).toBe(1);
   });
 
-  it("rejects idempotency-key payload mismatches", () => {
-    system.service.upsertProject(principalA, projectInput());
+  it("rejects idempotency-key payload mismatches", async () => {
+    await system.service.upsertProject(principalA, projectInput());
     try {
-      system.service.upsertProject(principalA, projectInput({ name: "Changed Name" }));
+      await system.service.upsertProject(principalA, projectInput({ name: "Changed Name" }));
       throw new Error("expected idempotency conflict");
     } catch (caught) {
       expect(caught).toBeInstanceOf(RelayError);
@@ -67,9 +67,9 @@ describe("SQLite Relay repository", () => {
     }
   });
 
-  it("rolls back a domain write when the audit write fails", () => {
+  it("rolls back a domain write when the audit write fails", async () => {
     system.repository.setFailAuditWritesForTesting(true);
-    expect(() => system.service.upsertProject(principalA, projectInput())).toThrow(
+    await expect(system.service.upsertProject(principalA, projectInput())).rejects.toThrow(
       "Injected audit write failure",
     );
     expect(system.repository.countRowsForTesting("projects")).toBe(0);
@@ -77,10 +77,10 @@ describe("SQLite Relay repository", () => {
     expect(system.repository.countRowsForTesting("idempotency_keys")).toBe(0);
   });
 
-  it("rolls back handoff artifacts and idempotency when its audit write fails", () => {
-    const project = system.service.upsertProject(principalA, projectInput()).project;
+  it("rolls back handoff artifacts and idempotency when its audit write fails", async () => {
+    const project = (await system.service.upsertProject(principalA, projectInput())).project;
     system.repository.setFailAuditWritesForTesting(true);
-    expect(() =>
+    await expect(
       system.service.createHandoff(
         principalA,
         handoffInput(project.id, {
@@ -89,17 +89,17 @@ describe("SQLite Relay repository", () => {
           ],
         }),
       ),
-    ).toThrow("Injected audit write failure");
+    ).rejects.toThrow("Injected audit write failure");
     expect(system.repository.countRowsForTesting("handoffs")).toBe(0);
     expect(system.repository.countRowsForTesting("artifacts")).toBe(0);
     expect(system.repository.countRowsForTesting("audit_events")).toBe(1);
     expect(system.repository.countRowsForTesting("idempotency_keys")).toBe(1);
   });
 
-  it("creates one audit event for every successful mutation", () => {
-    const project = system.service.upsertProject(principalA, projectInput()).project;
-    system.service.createHandoff(principalA, handoffInput(project.id));
-    system.service.createCheckpoint(principalA, checkpointInput(project.id));
+  it("creates one audit event for every successful mutation", async () => {
+    const project = (await system.service.upsertProject(principalA, projectInput())).project;
+    await system.service.createHandoff(principalA, handoffInput(project.id));
+    await system.service.createCheckpoint(principalA, checkpointInput(project.id));
     expect(system.repository.countRowsForTesting("audit_events")).toBe(3);
     expect(system.repository.countRowsForTesting("idempotency_keys")).toBe(3);
   });
@@ -138,9 +138,27 @@ describe("SQLite Relay repository", () => {
     expect(system.repository.countRowsForTesting("idempotency_keys")).toBe(1);
   });
 
-  it("paginates deterministically without duplicate records", () => {
+  it("serializes concurrent service requests on its single connection", async () => {
+    const results = await Promise.all(
+      Array.from({ length: 8 }, (_, index) =>
+        system.service.upsertProject(
+          { ...principalA, requestId: `concurrent-request-${index}` },
+          projectInput({
+            slug: `concurrent-project-${index}`,
+            name: `Concurrent Project ${index}`,
+            idempotency_key: `concurrent-project-key-${index}`,
+          }),
+        ),
+      ),
+    );
+    expect(new Set(results.map((result) => result.project.id)).size).toBe(8);
+    expect(system.repository.countRowsForTesting("projects")).toBe(8);
+    expect(system.repository.countRowsForTesting("audit_events")).toBe(8);
+  });
+
+  it("paginates deterministically without duplicate records", async () => {
     for (let index = 0; index < 5; index += 1) {
-      system.service.upsertProject(
+      await system.service.upsertProject(
         principalA,
         projectInput({
           slug: `project-${index}`,
@@ -149,11 +167,11 @@ describe("SQLite Relay repository", () => {
         }),
       );
     }
-    const first = system.service.listProjects(
+    const first = await system.service.listProjects(
       principalA,
       ListProjectsInputSchema.parse({ limit: 2 }),
     );
-    const second = system.service.listProjects(
+    const second = await system.service.listProjects(
       principalA,
       ListProjectsInputSchema.parse({ limit: 2, cursor: first.nextCursor }),
     );
@@ -162,27 +180,27 @@ describe("SQLite Relay repository", () => {
     expect(new Set([...first.items, ...second.items].map((project) => project.id)).size).toBe(4);
   });
 
-  it("paginates mixed history deterministically and filters record types", () => {
-    const project = system.service.upsertProject(principalA, projectInput()).project;
-    system.service.createHandoff(principalA, handoffInput(project.id));
-    system.service.createHandoff(
+  it("paginates mixed history deterministically and filters record types", async () => {
+    const project = (await system.service.upsertProject(principalA, projectInput())).project;
+    await system.service.createHandoff(principalA, handoffInput(project.id));
+    await system.service.createHandoff(
       principalA,
       handoffInput(project.id, {
         title: "Second handoff",
         idempotency_key: "handoff-key-0002",
       }),
     );
-    system.service.createCheckpoint(principalA, checkpointInput(project.id));
-    system.service.createCheckpoint(
+    await system.service.createCheckpoint(principalA, checkpointInput(project.id));
+    await system.service.createCheckpoint(
       principalA,
       checkpointInput(project.id, { idempotency_key: "checkpoint-key-0002" }),
     );
 
-    const first = system.service.listProjectHistory(
+    const first = await system.service.listProjectHistory(
       principalA,
       ListProjectHistoryInputSchema.parse({ project_id: project.id, limit: 2 }),
     );
-    const second = system.service.listProjectHistory(
+    const second = await system.service.listProjectHistory(
       principalA,
       ListProjectHistoryInputSchema.parse({
         project_id: project.id,
@@ -193,7 +211,7 @@ describe("SQLite Relay repository", () => {
     expect(first.next_cursor).not.toBeNull();
     expect(new Set([...first.records, ...second.records].map((record) => record.id)).size).toBe(4);
 
-    const handoffs = system.service.listProjectHistory(
+    const handoffs = await system.service.listProjectHistory(
       principalA,
       ListProjectHistoryInputSchema.parse({
         project_id: project.id,
@@ -205,10 +223,13 @@ describe("SQLite Relay repository", () => {
     expect(handoffs.records.every((record) => record.type === "handoff")).toBe(true);
   });
 
-  it("enforces handoff, checkpoint, and audit immutability in SQLite", () => {
-    const project = system.service.upsertProject(principalA, projectInput()).project;
-    const handoff = system.service.createHandoff(principalA, handoffInput(project.id));
-    const checkpoint = system.service.createCheckpoint(principalA, checkpointInput(project.id));
+  it("enforces handoff, checkpoint, and audit immutability in SQLite", async () => {
+    const project = (await system.service.upsertProject(principalA, projectInput())).project;
+    const handoff = await system.service.createHandoff(principalA, handoffInput(project.id));
+    const checkpoint = await system.service.createCheckpoint(
+      principalA,
+      checkpointInput(project.id),
+    );
     system.repository.close();
 
     const database = new DatabaseSync(system.databasePath);

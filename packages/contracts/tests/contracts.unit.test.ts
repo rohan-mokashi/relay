@@ -110,13 +110,13 @@ describe("Relay contracts", () => {
     }
   });
 
-  it("rejects a credential-shaped idempotency key before persistence", () => {
+  it("rejects a credential-shaped idempotency key before persistence", async () => {
     const system = createTestSystem();
     const credential = `sk-${"b".repeat(32)}`;
     try {
-      expect(() =>
+      await expect(
         system.service.upsertProject(principalA, projectInput({ idempotency_key: credential })),
-      ).toThrowError(RelayError);
+      ).rejects.toThrowError(RelayError);
       expect(system.repository.countRowsForTesting("projects")).toBe(0);
       expect(system.repository.countRowsForTesting("idempotency_keys")).toBe(0);
     } finally {

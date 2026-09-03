@@ -23,7 +23,10 @@ describe("Relay MCP tool contracts", () => {
   beforeEach(async () => {
     system = createTestSystem();
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    server = createRelayMcpServer(system.service, "principal-a");
+    server = createRelayMcpServer(system.service, "principal-a", undefined, {
+      read: ["relay:read"],
+      write: ["relay:read", "relay:write"],
+    });
     client = new Client({ name: "relay-contract-tests", version: "1.0.0" });
     await server.connect(serverTransport);
     await client.connect(clientTransport);
@@ -66,8 +69,12 @@ describe("Relay MCP tool contracts", () => {
         expect(tool.annotations?.readOnlyHint).toBe(false);
         expect(tool.annotations?.idempotentHint).toBe(true);
         expect(tool.description).toMatch(/durable/i);
+        expect(tool._meta?.securitySchemes).toEqual([
+          { type: "oauth2", scopes: ["relay:read", "relay:write"] },
+        ]);
       } else {
         expect(tool.annotations?.readOnlyHint).toBe(true);
+        expect(tool._meta?.securitySchemes).toEqual([{ type: "oauth2", scopes: ["relay:read"] }]);
       }
     }
   });
