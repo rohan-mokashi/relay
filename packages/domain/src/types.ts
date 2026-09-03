@@ -57,51 +57,61 @@ export interface CheckpointDraft
   createdAt: string;
 }
 
+export type Awaitable<T> = T | Promise<T>;
+
 export interface RelayRepository {
-  migrate(): void;
-  close(): void;
-  ensurePrincipal(externalRef: string, now: string): Principal;
+  withRequest<T>(operation: () => Awaitable<T>): Promise<T>;
+  migrate(): Awaitable<void>;
+  close(): Awaitable<void>;
+  ensurePrincipal(externalRef: string, now: string): Awaitable<Principal>;
   withIdempotency<T>(
     principalId: string,
     toolName: string,
     key: string,
     payloadHash: string,
     now: string,
-    operation: () => T,
-  ): T;
-  getProjectById(principalId: string, projectId: string): Project | null;
-  getProjectBySlug(principalId: string, slug: string): Project | null;
+    operation: () => Awaitable<T>,
+  ): Promise<T>;
+  getProjectById(principalId: string, projectId: string): Awaitable<Project | null>;
+  getProjectBySlug(principalId: string, slug: string): Awaitable<Project | null>;
   upsertProject(
     principalId: string,
     input: Omit<UpsertProjectInput, "idempotency_key" | "slug"> & { slug: string },
     projectId: string,
     now: string,
-  ): { project: Project; created: boolean };
-  listProjects(principalId: string, input: ListProjectsInput): Page<Project>;
-  getProjectRecordIds(principalId: string, projectId: string): ProjectRecordIds;
+  ): Awaitable<{ project: Project; created: boolean }>;
+  listProjects(principalId: string, input: ListProjectsInput): Awaitable<Page<Project>>;
+  getProjectRecordIds(principalId: string, projectId: string): Awaitable<ProjectRecordIds>;
   createArtifacts(
     principalId: string,
     projectId: string,
     artifacts: Array<ArtifactDefinition & { id: string }>,
     now: string,
-  ): Artifact[];
-  getArtifactsByIds(principalId: string, projectId: string, artifactIds: string[]): Artifact[];
-  getProjectArtifacts(principalId: string, projectId: string, limit: number): Artifact[];
-  insertHandoff(principalId: string, draft: HandoffDraft): Handoff;
-  getHandoffById(principalId: string, handoffId: string): Handoff | null;
-  getLatestHandoff(principalId: string, projectId: string): Handoff | null;
-  insertCheckpoint(principalId: string, draft: CheckpointDraft): Checkpoint;
-  getCheckpointById(principalId: string, checkpointId: string): Checkpoint | null;
+  ): Awaitable<Artifact[]>;
+  getArtifactsByIds(
+    principalId: string,
+    projectId: string,
+    artifactIds: string[],
+  ): Awaitable<Artifact[]>;
+  getProjectArtifacts(principalId: string, projectId: string, limit: number): Awaitable<Artifact[]>;
+  insertHandoff(principalId: string, draft: HandoffDraft): Awaitable<Handoff>;
+  getHandoffById(principalId: string, handoffId: string): Awaitable<Handoff | null>;
+  getLatestHandoff(principalId: string, projectId: string): Awaitable<Handoff | null>;
+  insertCheckpoint(principalId: string, draft: CheckpointDraft): Awaitable<Checkpoint>;
+  getCheckpointById(principalId: string, checkpointId: string): Awaitable<Checkpoint | null>;
   getLatestCheckpoint(
     principalId: string,
     projectId: string,
     status?: CheckpointStatus,
-  ): Checkpoint | null;
+  ): Awaitable<Checkpoint | null>;
   countProjectRecords(
     principalId: string,
     projectId: string,
-  ): { handoffCount: number; checkpointCount: number };
-  listProjectHistory(principalId: string, input: ListProjectHistoryInput): Page<HistoryItem>;
+  ): Awaitable<{ handoffCount: number; checkpointCount: number }>;
+  listProjectHistory(
+    principalId: string,
+    input: ListProjectHistoryInput,
+  ): Awaitable<Page<HistoryItem>>;
   appendAudit(event: {
     id: string;
     principalId: string;
@@ -112,5 +122,5 @@ export interface RelayRepository {
     requestId: string;
     createdAt: string;
     metadata?: Record<string, string | number | boolean | null>;
-  }): void;
+  }): Awaitable<void>;
 }

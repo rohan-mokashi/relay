@@ -21,7 +21,7 @@ try {
 
 if (config) {
   const repository = new SqliteRelayRepository(config.databasePath);
-  repository.migrate();
+  await repository.migrate();
   const logger = new SafeLogger();
   const service = new RelayService(repository);
   const server = createRelayMcpServer(service, config.principalRef, (event) => {
@@ -42,7 +42,7 @@ if (config) {
 
   const shutdown = async () => {
     await server.close();
-    repository.close();
+    await repository.close();
     process.exitCode = 0;
   };
   process.once("SIGINT", () => void shutdown());

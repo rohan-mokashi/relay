@@ -133,6 +133,7 @@ export class SqliteRelayRepository implements RelayRepository {
   private readonly database: DatabaseSync;
   private failAuditWrites: boolean;
   private readonly migrationDirectory?: string;
+  private requestQueue: Promise<void> = Promise.resolve();
 
   constructor(
     readonly databasePath: string,
@@ -147,6 +148,20 @@ export class SqliteRelayRepository implements RelayRepository {
     if (databasePath !== ":memory:") this.database.exec("PRAGMA journal_mode = WAL");
     this.failAuditWrites = options.failAuditWrites ?? false;
     this.migrationDirectory = options.migrationDirectory;
+  }
+
+  async withRequest<T>(operation: () => T | Promise<T>): Promise<T> {
+    const previous = this.requestQueue;
+    let release: () => void = () => undefined;
+    this.requestQueue = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await previous;
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
   }
 
   migrate(): void {
@@ -205,15 +220,15 @@ export class SqliteRelayRepository implements RelayRepository {
     return { id: row.id, createdAt: row.created_at };
   }
 
-  withIdempotency<T>(
+  async withIdempotency<T>(
     principalId: string,
     toolName: string,
     key: string,
     payloadHash: string,
     now: string,
-    operation: () => T,
-  ): T {
-    return this.immediateTransaction(() => {
+    operation: () => T | Promise<T>,
+  ): Promise<T> {
+    return await this.immediateTransaction(async () => {
       const existing = this.database
         .prepare(
           `SELECT payload_hash, result_json
@@ -234,7 +249,7 @@ export class SqliteRelayRepository implements RelayRepository {
         return parseJson<T>(existing.result_json);
       }
 
-      const result = operation();
+      const result = await operation();
       this.database
         .prepare(
           `INSERT INTO idempotency_keys
@@ -246,10 +261,10 @@ export class SqliteRelayRepository implements RelayRepository {
     });
   }
 
-  private immediateTransaction<T>(operation: () => T): T {
+  private async immediateTransaction<T>(operation: () => T | Promise<T>): Promise<T> {
     this.database.exec("BEGIN IMMEDIATE");
     try {
-      const result = operation();
+      const result = await operation();
       this.database.exec("COMMIT");
       return result;
     } catch (error) {

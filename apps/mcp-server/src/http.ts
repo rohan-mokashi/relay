@@ -17,7 +17,12 @@ import {
 } from "../../../packages/contracts/src/index.js";
 import { RelayError, asRelayError } from "../../../packages/domain/src/errors.js";
 import type { RelayService } from "../../../packages/domain/src/service.js";
-import type { DevTokenAuthenticator } from "./auth.js";
+import {
+  RELAY_READ_SCOPE,
+  RELAY_WRITE_SCOPE,
+  type RelayAuthenticator,
+  requireScopes,
+} from "./auth.js";
 import { SafeLogger, principalLogId } from "./logger.js";
 import { createRelayMcpServer } from "./mcp.js";
 import { PrincipalRateLimiter } from "./rate-limit.js";
@@ -30,7 +35,7 @@ interface Session {
 
 export interface RelayHttpServerOptions {
   service: RelayService;
-  authenticator: DevTokenAuthenticator;
+  authenticator: RelayAuthenticator;
   logger?: SafeLogger;
   rateLimiter?: PrincipalRateLimiter;
   requestByteLimit?: number;
@@ -129,10 +134,15 @@ const statusForError = (code: ErrorCode): number => {
   }
 };
 
-const sendHttpError = (response: ServerResponse, error: RelayError, requestId: string): void => {
+const sendHttpError = (
+  response: ServerResponse,
+  error: RelayError,
+  requestId: string,
+  challenge?: string,
+): void => {
   if (response.headersSent) return;
-  if (error.code === "AUTHENTICATION_REQUIRED") {
-    response.setHeader("www-authenticate", 'Bearer realm="relay"');
+  if (challenge && ["AUTHENTICATION_REQUIRED", "ACCESS_DENIED"].includes(error.code)) {
+    response.setHeader("www-authenticate", challenge);
   }
   sendJson(response, statusForError(error.code), {
     error: {
@@ -145,6 +155,16 @@ const sendHttpError = (response: ServerResponse, error: RelayError, requestId: s
 };
 
 const bodyMetadata = (body: unknown): { toolName?: string; projectId?: string } => {
+  if (Array.isArray(body)) {
+    const entries = body.map((entry) => bodyMetadata(entry));
+    return (
+      entries.find((entry) =>
+        ["upsert_project", "create_handoff", "create_checkpoint"].includes(entry.toolName ?? ""),
+      ) ??
+      entries.find((entry) => entry.toolName) ??
+      {}
+    );
+  }
   if (!body || typeof body !== "object") return {};
   const record = body as Record<string, unknown>;
   if (record.method !== "tools/call" || !record.params || typeof record.params !== "object")
@@ -168,6 +188,7 @@ export const createRelayHttpServer = (options: RelayHttpServerOptions): RelayHtt
   const limiter = options.rateLimiter ?? new PrincipalRateLimiter(120);
   const byteLimit = options.requestByteLimit ?? LIMITS.requestBytes;
   const sessions = new Map<string, Session>();
+  const mutationTools = new Set(["upsert_project", "create_handoff", "create_checkpoint"]);
 
   const handler = async (request: IncomingMessage, response: ServerResponse): Promise<void> => {
     const startedAt = performance.now();
@@ -178,10 +199,22 @@ export const createRelayHttpServer = (options: RelayHttpServerOptions): RelayHtt
     let projectId: string | undefined;
     let status = "ok";
     let errorCode: string | undefined;
+    let requiredScopes: string[] = [RELAY_READ_SCOPE];
 
     try {
       const url = new URL(request.url ?? "/", "http://relay.local");
-      principalRef = options.authenticator.authenticate(request.headers.authorization);
+      const protectedResourceMetadata = options.authenticator.protectedResourceMetadata();
+      if (
+        url.pathname === "/.well-known/oauth-protected-resource" &&
+        request.method === "GET" &&
+        protectedResourceMetadata
+      ) {
+        sendJson(response, 200, protectedResourceMetadata);
+        return;
+      }
+
+      const authenticated = await options.authenticator.authenticate(request.headers.authorization);
+      principalRef = authenticated.principalRef;
       limiter.consume(principalRef);
 
       if (url.pathname !== "/mcp" && url.pathname !== "/healthz") {
@@ -211,6 +244,11 @@ export const createRelayHttpServer = (options: RelayHttpServerOptions): RelayHtt
         ({ toolName, projectId } = bodyMetadata(body));
       }
 
+      if (toolName && mutationTools.has(toolName)) {
+        requiredScopes = [RELAY_READ_SCOPE, RELAY_WRITE_SCOPE];
+      }
+      requireScopes(authenticated, requiredScopes);
+
       const sessionId = sessionIdFrom(request);
       let session = sessionId ? sessions.get(sessionId) : undefined;
 
@@ -236,18 +274,23 @@ export const createRelayHttpServer = (options: RelayHttpServerOptions): RelayHtt
             sessions.set(initializedId, createdSession);
           },
         });
-        const mcpServer = createRelayMcpServer(options.service, principalRef, (event) => {
-          logger.log({
-            level: event.status === "ok" ? "info" : "warn",
-            event: "tool.call",
-            requestId: event.requestId,
-            toolName: event.toolName,
-            principalId: principalLogId(principalRef ?? ""),
-            status: event.status,
-            durationMs: event.durationMs,
-            errorCode: event.errorCode,
-          });
-        });
+        const mcpServer = createRelayMcpServer(
+          options.service,
+          principalRef,
+          (event) => {
+            logger.log({
+              level: event.status === "ok" ? "info" : "warn",
+              event: "tool.call",
+              requestId: event.requestId,
+              toolName: event.toolName,
+              principalId: principalLogId(principalRef ?? ""),
+              status: event.status,
+              durationMs: event.durationMs,
+              errorCode: event.errorCode,
+            });
+          },
+          options.authenticator.securityScopes(),
+        );
         createdSession = { principalRef, transport, mcpServer };
         transport.onclose = () => {
           const id = transport.sessionId;
@@ -276,7 +319,15 @@ export const createRelayHttpServer = (options: RelayHttpServerOptions): RelayHtt
           ? new RelayError("PAYLOAD_TOO_LARGE", `Request exceeds ${byteLimit} bytes.`)
           : asRelayError(caught);
       errorCode = error.code;
-      sendHttpError(response, error, requestId);
+      sendHttpError(
+        response,
+        error,
+        requestId,
+        options.authenticator.challenge(
+          requiredScopes,
+          error.code === "ACCESS_DENIED" ? "insufficient_scope" : "invalid_token",
+        ),
+      );
     } finally {
       logger.log({
         level: status === "ok" ? "info" : "warn",

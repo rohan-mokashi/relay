@@ -73,7 +73,10 @@ interface DefineToolOptions<InputSchema extends z.ZodType, OutputSchema extends 
   inputSchema: InputSchema;
   outputSchema: OutputSchema;
   annotations: ToolAnnotations;
-  invoke: (context: RequestContext, input: z.output<InputSchema>) => z.output<OutputSchema>;
+  invoke: (
+    context: RequestContext,
+    input: z.output<InputSchema>,
+  ) => z.output<OutputSchema> | Promise<z.output<OutputSchema>>;
   summarize: (result: z.output<OutputSchema>) => string;
 }
 
@@ -197,6 +200,7 @@ export const createRelayMcpServer = (
   service: RelayService,
   principalRef: string,
   onToolCall?: (event: ToolCallEvent) => void,
+  securityScopes?: { read: string[]; write: string[] },
 ): Server => {
   const tools: ToolDefinition[] = [
     defineTool({
@@ -219,8 +223,8 @@ export const createRelayMcpServer = (
       inputSchema: ListProjectsInputSchema,
       outputSchema: ListProjectsOutputSchema,
       annotations: readAnnotations,
-      invoke: (context, input) => {
-        const page = service.listProjects(context, input);
+      invoke: async (context, input) => {
+        const page = await service.listProjects(context, input);
         return { projects: page.items, next_cursor: page.nextCursor };
       },
       summarize: (result) =>
@@ -313,7 +317,7 @@ export const createRelayMcpServer = (
 
   const byName = new Map(tools.map((tool) => [tool.name, tool]));
   const server = new Server(
-    { name: "relay", version: "0.1.0" },
+    { name: "relay", version: "0.2.0" },
     {
       capabilities: { tools: {} },
       instructions:
@@ -322,18 +326,30 @@ export const createRelayMcpServer = (
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: tools.map((tool) => ({
-      name: tool.name,
-      title: tool.title,
-      description: tool.description,
-      inputSchema: jsonObjectSchema(tool.inputSchema),
-      outputSchema: jsonObjectSchema(tool.outputSchema),
-      annotations: tool.annotations,
-      _meta: {
-        "relay/authentication": "required",
-        "relay/contentPolicy": "explicit-structured-context-only",
-      },
-    })),
+    tools: tools.map((tool) => {
+      const securitySchemes = securityScopes
+        ? [
+            {
+              type: "oauth2" as const,
+              scopes: tool.annotations.readOnlyHint ? securityScopes.read : securityScopes.write,
+            },
+          ]
+        : undefined;
+      return {
+        name: tool.name,
+        title: tool.title,
+        description: tool.description,
+        inputSchema: jsonObjectSchema(tool.inputSchema),
+        outputSchema: jsonObjectSchema(tool.outputSchema),
+        annotations: tool.annotations,
+        ...(securitySchemes ? { securitySchemes } : {}),
+        _meta: {
+          ...(securitySchemes ? { securitySchemes } : {}),
+          "relay/authentication": "required",
+          "relay/contentPolicy": "explicit-structured-context-only",
+        },
+      };
+    }),
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToolResult> => {

@@ -6,6 +6,7 @@ const pluginRoot = resolve(root, "plugin/relay");
 const manifestPath = resolve(pluginRoot, ".codex-plugin/plugin.json");
 const mcpPath = resolve(pluginRoot, ".mcp.json");
 const appPath = resolve(pluginRoot, ".app.json");
+const packagePath = resolve(root, "package.json");
 
 const fail = (message) => {
   throw new Error(`Relay plugin check failed: ${message}`);
@@ -21,7 +22,8 @@ const readObject = (path, label) => {
 };
 
 const manifest = readObject(manifestPath, "plugin manifest");
-if (manifest.name !== "relay" || manifest.version !== "0.1.0") {
+const packageMetadata = readObject(packagePath, "package metadata");
+if (manifest.name !== "relay" || manifest.version !== packageMetadata.version) {
   fail("plugin identity or version is unexpected");
 }
 if (manifest.skills !== undefined) fail("manifest references an unbundled skills directory");

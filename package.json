@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Explicit, auditable project-context handoffs between ChatGPT Work and Codex over MCP.",
   "type": "module",
@@ -34,11 +34,15 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
+    "jose": "6.2.10",
+    "pg": "8.23.0",
     "zod": "4.5.4"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.11",
+    "@electric-sql/pglite": "0.5.8",
     "@types/node": "24.13.3",
+    "@types/pg": "8.23.1",
     "tsx": "4.23.13",
     "typescript": "7.0.2",
     "vitest": "4.1.11"
