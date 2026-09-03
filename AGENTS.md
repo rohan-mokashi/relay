@@ -3,7 +3,8 @@
 ## Mission
 
 Maintain Relay's secure, explicit, bidirectional project-context handoff and evolve the completed
-v0.1 proof into the v0.2 production foundation defined in `V0_2_SPEC.md`.
+v0.2 production foundation into the v0.3 independent-client interoperability release defined in
+`V0_3_SPEC.md`.
 
 ## Read order
 
@@ -17,6 +18,7 @@ Before planning or changing code, read completely:
 6. `SECURITY_MODEL.md`
 7. `EVALS_AND_ACCEPTANCE_TESTS.md`
 8. `V0_2_SPEC.md`
+9. `V0_3_SPEC.md`
 
 ## Required behavior
 
@@ -43,6 +45,8 @@ Before planning or changing code, read completely:
 - Do not claim a verification passed unless you ran it and observed the result.
 - Do not deploy externally, publish a plugin, or create paid infrastructure without explicit user authorization.
 - Do not silently broaden the product into a generic memory platform.
+- Do not put work orchestration, queues, schedulers, leases, autonomous loops, or self-prompting
+  into Relay. Those belong to the external development workflow, not the product.
 
 ## Implementation workflow
 
@@ -68,4 +72,6 @@ verified rather than guessed.
 
 ## Definition of done
 
-The repository is not complete merely because the MCP server starts. Completion requires passing automated tests, documented Windows setup, real MCP calls, and the manual ChatGPT Work → Codex → ChatGPT Work round trip defined in `EVALS_AND_ACCEPTANCE_TESTS.md`.
+The v0.3 milestone is not complete merely because the MCP server starts or an SDK harness passes.
+Completion requires the inherited verification suite plus the real Visual Studio Code and
+cross-client run defined in `docs/v0.3-interoperability-acceptance.md`.

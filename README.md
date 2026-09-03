@@ -1,13 +1,14 @@
-# Relay v0.2
+# Relay v0.3
 
 Relay is a local-first MCP service for explicit, auditable project-context handoffs between
 ChatGPT Work and Codex. It stores only the structured project capsule a caller deliberately
 submits. It does not read chats, synchronize private memories, control Codex, run repository
 commands, or fetch artifact URLs.
 
-The v0.1 local continuity proof remains intact. v0.2 adds a production resource-server boundary:
-OAuth access-token validation, scoped MCP tools, discovery metadata, and managed PostgreSQL
-persistence. It does not provision or operate an identity provider, database, or public deployment.
+The v0.1 local continuity proof and v0.2 production foundation remain intact. v0.3 adds a portable
+Visual Studio Code MCP configuration and independent-client acceptance gate without changing the
+nine-tool product contract. It does not provision or operate an identity provider, database, or
+public deployment, and it does not put workflow orchestration inside Relay.
 
 ## Architecture
 
@@ -56,8 +57,8 @@ pnpm verify
 ```
 
 The verifier runs lint, formatting, strict type checking, the production build, deterministic
-migration checks, plugin metadata checks, all test projects, repository secret scanning, and the
-dependency audit.
+migration checks, portable-client and plugin metadata checks, all test projects, repository secret
+scanning, and the dependency audit.
 
 ## Development integration paths
 
@@ -66,6 +67,11 @@ dependency audit.
 - ChatGPT Work: use Secure MCP Tunnel with the trusted stdio entry point. The Windows runbook
   includes a checksum-verifying, repository-local installer for the public tunnel client. See
   [docs/setup-windows.md](docs/setup-windows.md#connect-chatgpt-work-through-secure-mcp-tunnel).
+- Visual Studio Code: open the repository and use the portable root `.mcp.json` with
+  [docs/setup-vscode.md](docs/setup-vscode.md). The observed real-host procedure in
+  [docs/v0.3-interoperability-acceptance.md](docs/v0.3-interoperability-acceptance.md) is the v0.3
+  release gate; current evidence is tracked in
+  [docs/v0.3-acceptance-record.md](docs/v0.3-acceptance-record.md).
 - Plugin package: the current local package is in [plugin/relay](plugin/relay). Registration and
   the real non-secret `.app.json` connection mapping are explained in
   [plugin/relay/README.md](plugin/relay/README.md).
