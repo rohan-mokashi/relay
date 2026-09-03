@@ -29,6 +29,7 @@
     "test:e2e": "vitest run --project e2e",
     "plugin:check": "node scripts/check-plugin.mjs",
     "clients:check": "node scripts/check-client-configs.mjs",
+    "vscode:preflight": "node scripts/vscode-preflight.mjs",
     "secret:scan": "node scripts/secret-scan.mjs",
     "audit": "pnpm audit --audit-level high",
     "verify": "node scripts/verify.mjs"

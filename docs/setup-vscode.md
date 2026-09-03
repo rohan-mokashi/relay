@@ -28,7 +28,12 @@ Check the configuration and server process before opening the client:
 ```powershell
 pnpm clients:check
 pnpm test:e2e -- stdio-client
+pnpm vscode:preflight
 ```
+
+The preflight reports only whether required local values exist; it never prints their contents. A
+`PENDING` independent-provider result requires an explicit operator choice and any associated
+account sign-in. Relay does not install or authenticate a third-party agent automatically.
 
 ## Start from Visual Studio Code
 
