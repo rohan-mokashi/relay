@@ -6,11 +6,12 @@ This directory follows the current Codex plugin layout:
 - `.mcp.json` configures the authenticated Relay loopback Streamable HTTP server for local Codex
   plugin testing.
 - `.app.json` maps the package to the real `Relay Bootstrap` ChatGPT connection created during the
-  v0.1 acceptance run.
+  v0.1 acceptance run and retained for v0.2 local regression testing.
 
 The local MCP entry stores only `bearer_token_env_var: RELAY_DEV_TOKEN`; it contains no token. Start
 Relay at `http://127.0.0.1:8787/mcp` and make the environment variable available to the Codex host
-before enabling this package.
+before enabling this package. Hosted v0.2 connections use OAuth discovery at the public resource
+URL and are configured by the deployment operator, not this local development file.
 
 ## ChatGPT registered connection
 

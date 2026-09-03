@@ -1,14 +1,13 @@
-# Relay v0.1
+# Relay v0.2
 
 Relay is a local-first MCP service for explicit, auditable project-context handoffs between
 ChatGPT Work and Codex. It stores only the structured project capsule a caller deliberately
 submits. It does not read chats, synchronize private memories, control Codex, run repository
 commands, or fetch artifact URLs.
 
-The local implementation is complete and covered by unit, integration, MCP contract, security,
-and real-transport end-to-end tests. The real ChatGPT Work → Codex → ChatGPT Work acceptance run
-has also passed. Repeating that external run requires the operator's OpenAI tunnel credential,
-`tunnel_id`, workspace association, and developer-mode permission.
+The v0.1 local continuity proof remains intact. v0.2 adds a production resource-server boundary:
+OAuth access-token validation, scoped MCP tools, discovery metadata, and managed PostgreSQL
+persistence. It does not provision or operate an identity provider, database, or public deployment.
 
 ## Architecture
 
@@ -16,14 +15,15 @@ has also passed. Repeating that external run requires the operator's OpenAI tunn
 | --- | --- |
 | External contract | Strict Zod schemas shared by all nine MCP tools |
 | MCP transport | Stateful Streamable HTTP at `/mcp`; trusted stdio adapter for Secure MCP Tunnel |
-| Identity | Constant-time development bearer-token adapter, or an explicitly configured trusted stdio principal |
+| Identity | OAuth JWT resource server with issuer/audience/scope validation; development-token and trusted-stdio adapters remain local-only |
 | Domain | Provider-neutral Relay service and repository interface |
-| Persistence | SQLite, ordered migrations, foreign keys, WAL, immutable records, append-only audit events |
+| Persistence | Local SQLite or managed PostgreSQL; ordered migrations, immutable records, append-only audit events |
 | Reliability | Atomic domain/audit/idempotency transactions and deterministic pagination |
 | Observability | JSON logs containing only allowlisted metadata; no tokens or capsule bodies |
 
-The HTTP server binds to `127.0.0.1` by default and authenticates every supported endpoint,
-including `/healthz`. The stdio adapter refuses to start without `RELAY_TUNNEL_PRINCIPAL`.
+The HTTP server binds to `127.0.0.1` by default and authenticates every operational endpoint,
+including `/healthz`. OAuth mode additionally exposes the public RFC 9728 protected-resource
+metadata endpoint. The stdio adapter refuses to start without `RELAY_TUNNEL_PRINCIPAL`.
 
 ## Required MCP tools
 
@@ -69,18 +69,20 @@ dependency audit.
 - Plugin package: the current local package is in [plugin/relay](plugin/relay). Registration and
   the real non-secret `.app.json` connection mapping are explained in
   [plugin/relay/README.md](plugin/relay/README.md).
+- Hosted foundation: configure an external OAuth 2.1 authorization server and managed PostgreSQL
+  using [docs/setup-production.md](docs/setup-production.md).
 
 The manual three-surface proof is in
 [docs/manual-acceptance.md](docs/manual-acceptance.md).
 
 ## Security boundary
 
-Static bearer tokens and the trusted stdio principal are development-only mechanisms. The stdio
-profile represents one personal principal; it is not safe as a shared-workspace identity scheme.
-Before any hosted or multi-user release, Relay needs standards-conformant OAuth 2.1, token claim
-validation, scope enforcement, revocation, encrypted managed storage/backups, abuse monitoring,
-and a dedicated privacy review. See [docs/threat-model.md](docs/threat-model.md) and the accepted
-ADRs under [docs/decisions](docs/decisions).
+Static bearer tokens and the trusted stdio principal are development-only mechanisms. OAuth mode
+is a resource server, not an authorization server: the operator remains responsible for identity
+provider policy, client registration/PKCE, revocation, managed database encryption and backups,
+distributed abuse controls, and a dedicated privacy review. See
+[docs/threat-model.md](docs/threat-model.md) and the accepted ADRs under
+[docs/decisions](docs/decisions).
 
 ## Authoritative specifications
 
