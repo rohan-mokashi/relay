@@ -12,6 +12,7 @@ const checks = [
   "typecheck",
   "build",
   "migrate:check",
+  "clients:check",
   "plugin:check",
   "test",
   "secret:scan",

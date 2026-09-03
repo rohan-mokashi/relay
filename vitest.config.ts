@@ -2,6 +2,9 @@ import { defineConfig } from "vitest/config";
 
 const shared = {
   environment: "node" as const,
+  // PGlite and stdio process tests both allocate native child workers. Serial files keep the
+  // clean-checkout verifier deterministic on resource-constrained Windows hosts.
+  fileParallelism: false,
   testTimeout: 20_000,
   hookTimeout: 20_000,
   isolate: true,

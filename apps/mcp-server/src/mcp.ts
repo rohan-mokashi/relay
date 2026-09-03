@@ -317,7 +317,7 @@ export const createRelayMcpServer = (
 
   const byName = new Map(tools.map((tool) => [tool.name, tool]));
   const server = new Server(
-    { name: "relay", version: "0.2.0" },
+    { name: "relay", version: "0.3.0" },
     {
       capabilities: { tools: {} },
       instructions:
