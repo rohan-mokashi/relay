@@ -8,6 +8,7 @@ const metadata = JSON.parse(read("package.json"));
 const pluginMetadata = JSON.parse(read("plugin/relay/.codex-plugin/plugin.json"));
 
 assert.match(metadata.version, /^\d+\.\d+\.\d+-alpha\.\d+$/u);
+assert.equal(metadata.license, "Apache-2.0");
 assert.equal(metadata.scripts["open-alpha:check"], "node scripts/open-alpha-check.mjs");
 assert.equal(pluginMetadata.version, metadata.version, "Plugin and package versions differ.");
 assert.match(
@@ -19,6 +20,8 @@ assert.match(read("scripts/verify.mjs"), /"open-alpha:check"/u);
 
 for (const path of [
   "OPEN_ALPHA_SPEC.md",
+  "LICENSE",
+  "NOTICE",
   "SECURITY.md",
   "docs/open-alpha/README.md",
   "docs/open-alpha/operator-checklist.md",
@@ -73,6 +76,8 @@ const issueConfiguration = read(".github/ISSUE_TEMPLATE/config.yml");
 assert.match(issueConfiguration, /blank_issues_enabled: false/u);
 assert.match(issueConfiguration, /security\/advisories\/new/u);
 assert.match(read("SECURITY.md"), /security\/advisories\/new/u);
+assert.match(read("LICENSE"), /Apache License\s+Version 2\.0, January 2004/u);
+assert.match(read("NOTICE"), /Copyright 2026 Rohan Mokashi/u);
 assert.match(read("docs/open-alpha/release-notes.md"), new RegExp(metadata.version, "u"));
 assert.match(read(".gitignore"), /^\.data\/$/mu);
 assert.match(read("scripts/secret-scan.mjs"), /safe\.directory=/u);
