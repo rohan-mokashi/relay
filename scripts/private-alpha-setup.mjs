@@ -45,14 +45,31 @@ export const provisionPrivateAlphaEnvironment = (
   return { created: true, path: environmentPath };
 };
 
+export const resolvePnpmCommand = (
+  args,
+  {
+    packageManagerEntry = process.env.npm_execpath,
+    platform = process.platform,
+    commandShell = process.env.ComSpec,
+  } = {},
+) => {
+  if (packageManagerEntry) {
+    return { executable: process.execPath, arguments: [packageManagerEntry, ...args] };
+  }
+  if (platform === "win32") {
+    if (!args.every((argument) => /^[A-Za-z0-9:._-]+$/u.test(argument))) {
+      throw new Error("Refusing to pass an unsafe argument to the Windows pnpm launcher.");
+    }
+    return {
+      executable: commandShell || "cmd.exe",
+      arguments: ["/d", "/s", "/c", `pnpm ${args.join(" ")}`],
+    };
+  }
+  return { executable: "pnpm", arguments: args };
+};
+
 const runPnpm = (workspaceRoot, args) => {
-  const packageManagerEntry = process.env.npm_execpath;
-  const command = packageManagerEntry
-    ? { executable: process.execPath, arguments: [packageManagerEntry, ...args] }
-    : {
-        executable: process.platform === "win32" ? "pnpm.cmd" : "pnpm",
-        arguments: args,
-      };
+  const command = resolvePnpmCommand(args);
   const result = spawnSync(command.executable, command.arguments, {
     cwd: workspaceRoot,
     stdio: "inherit",

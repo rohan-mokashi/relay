@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.2",
   "private": true,
   "description": "Explicit, auditable project-context handoffs across MCP clients.",
   "type": "module",

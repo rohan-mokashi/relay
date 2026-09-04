@@ -6,9 +6,28 @@ import { join, resolve } from "node:path";
 import {
   provisionPrivateAlphaEnvironment,
   renderPrivateAlphaEnvironment,
+  resolvePnpmCommand,
 } from "./private-alpha-setup.mjs";
 
 const workspaceRoot = resolve(import.meta.dirname, "..");
+const windowsPnpmCommand = resolvePnpmCommand(["install", "--frozen-lockfile"], {
+  packageManagerEntry: "",
+  platform: "win32",
+  commandShell: "cmd.exe",
+});
+assert.deepEqual(windowsPnpmCommand, {
+  executable: "cmd.exe",
+  arguments: ["/d", "/s", "/c", "pnpm install --frozen-lockfile"],
+});
+assert.throws(
+  () =>
+    resolvePnpmCommand(["install", "&unsafe"], {
+      packageManagerEntry: "",
+      platform: "win32",
+      commandShell: "cmd.exe",
+    }),
+  /unsafe argument/u,
+);
 const metadata = JSON.parse(readFileSync(resolve(workspaceRoot, "package.json"), "utf8"));
 assert.match(metadata.version, /^\d+\.\d+\.\d+-alpha\.\d+$/u);
 for (const script of [

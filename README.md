@@ -6,7 +6,7 @@ submits. It does not read chats, synchronize private memories, control Codex, ru
 commands, or fetch artifact URLs.
 
 The v0.1 local continuity proof, v0.2 production foundation, and v0.3 independent-client gate are
-complete. This `0.4.0-alpha.1` candidate adds reproducible onboarding, diagnostics, packaging,
+complete. This `0.4.0-alpha.2` candidate adds reproducible onboarding, diagnostics, packaging,
 aggregate-only study metrics, and operator/support gates without changing the nine-tool product
 contract. It does not provision hosted infrastructure or put workflow orchestration inside Relay.
 
