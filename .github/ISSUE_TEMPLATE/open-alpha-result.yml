@@ -1,0 +1,101 @@
+name: Submit an Open Alpha result
+description: Submit only the structured numeric and boolean study outcomes.
+title: "[Open Alpha result]: "
+labels:
+  - open-alpha-result
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue and your GitHub username are public. Submit no project name, capsule text, repository path, chat link, credential, private URL, raw request, or free-form project detail. The operator will assign a separate random reference when transcribing accepted values into the local aggregate dataset.
+  - type: input
+    id: release
+    attributes:
+      label: Release version and commit
+      placeholder: 0.4.0-alpha.3 / twelve-character commit from the release JSON
+    validations:
+      required: true
+  - type: input
+    id: onboarding-minutes
+    attributes:
+      label: Onboarding minutes
+      description: Download or clone start to the first successful authenticated list_projects call.
+      placeholder: "8.5"
+    validations:
+      required: true
+  - type: input
+    id: continuation-minutes
+    attributes:
+      label: Continuation minutes
+      description: Receiving-client prompt sent to correct Relay context displayed.
+      placeholder: "0.8"
+    validations:
+      required: true
+  - type: input
+    id: repeated-context-items
+    attributes:
+      label: Repeated context items
+      placeholder: "0"
+    validations:
+      required: true
+  - type: input
+    id: incorrect-assumptions
+    attributes:
+      label: Incorrect assumptions attributable to missing or wrong Relay context
+      placeholder: "0"
+    validations:
+      required: true
+  - type: input
+    id: criteria-total
+    attributes:
+      label: Acceptance criteria evaluated
+      placeholder: "4"
+    validations:
+      required: true
+  - type: input
+    id: criteria-completed
+    attributes:
+      label: Acceptance criteria completed correctly
+      placeholder: "4"
+    validations:
+      required: true
+  - type: dropdown
+    id: trust-rating
+    attributes:
+      label: Trust rating
+      description: How much did you trust the stored capsule, from 1 (none) to 5 (high)?
+      options:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+    validations:
+      required: true
+  - type: dropdown
+    id: second-project
+    attributes:
+      label: Voluntary second-project use
+      description: Did you genuinely choose to use Relay for a second project during the study window?
+      options:
+        - "No"
+        - "Yes"
+    validations:
+      required: true
+  - type: input
+    id: support-requests
+    attributes:
+      label: Number of support contacts
+      placeholder: "0"
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Submission confirmation
+      options:
+        - label: These are my final observed values, not synthetic data.
+          required: true
+        - label: I did not include project content, credentials, identity fields, private links, or free-form project details.
+          required: true
+

@@ -1,0 +1,57 @@
+name: Relay support report
+description: Report a non-security setup or compatibility problem using redacted diagnostics.
+title: "[Support]: "
+labels:
+  - support
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Public issue: do not include `.env`, tokens, authorization headers, database URLs, raw capsules, private repository content, or chat exports. Report security concerns through GitHub private vulnerability reporting instead.
+  - type: input
+    id: release
+    attributes:
+      label: Release version and commit
+      placeholder: 0.4.0-alpha.3 / twelve-character commit from the release JSON
+    validations:
+      required: true
+  - type: input
+    id: failed-step
+    attributes:
+      label: Failed step
+      placeholder: alpha:setup, alpha:doctor, VS Code server start, or another documented step
+    validations:
+      required: true
+  - type: textarea
+    id: doctor-output
+    attributes:
+      label: Redacted doctor output
+      description: Paste only complete `pnpm alpha:doctor` output after confirming it contains no private additions.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Operating system and MCP client versions
+      placeholder: Windows 11; VS Code 1.x; Codex version if applicable
+    validations:
+      required: true
+  - type: dropdown
+    id: retry
+    attributes:
+      label: Did one retry change the result?
+      options:
+        - "No"
+        - "Yes"
+        - Not attempted
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: This report contains no credential, private project content, private URL, database location, or suspected vulnerability.
+          required: true
+

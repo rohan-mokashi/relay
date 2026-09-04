@@ -15,6 +15,7 @@ const checks = [
   "clients:check",
   "plugin:check",
   "alpha:check",
+  "open-alpha:check",
   "test",
   "secret:scan",
   "audit",

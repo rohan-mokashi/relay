@@ -3,8 +3,8 @@
 ## Mission
 
 Maintain Relay's secure, explicit, bidirectional project-context handoff and evolve the completed
-v0.3 interoperability milestone into the measurable, bounded Private Alpha readiness release
-defined in `PRIVATE_ALPHA_SPEC.md`.
+Private Alpha readiness release into the publicly recruited, still-bounded Open Alpha defined in
+`OPEN_ALPHA_SPEC.md`.
 
 ## Read order
 
@@ -20,6 +20,7 @@ Before planning or changing code, read completely:
 8. `V0_2_SPEC.md`
 9. `V0_3_SPEC.md`
 10. `PRIVATE_ALPHA_SPEC.md`
+11. `OPEN_ALPHA_SPEC.md`
 
 ## Required behavior
 
@@ -73,8 +74,8 @@ verified rather than guessed.
 
 ## Definition of done
 
-Private Alpha entry requires the inherited verification suite, a reproducible source bundle,
-sub-10-minute onboarding tooling, redacted diagnostics, aggregate-only value metrics, and the
-support/incident gates in `PRIVATE_ALPHA_SPEC.md`. Private Alpha exit is separate: do not claim it
-or begin Public Beta work until 10–20 real participants provide repeat-usage and continuation-value
-evidence that passes the pre-registered gates.
+Open Alpha entry requires the inherited Private Alpha verification suite, a reproducible source
+bundle, sub-10-minute onboarding tooling, redacted diagnostics, aggregate-only value metrics, safe
+public intake, and the support/incident gates in `OPEN_ALPHA_SPEC.md`. Alpha exit is separate: do
+not claim it or begin Public Beta work until 10–20 real participants provide repeat-usage and
+continuation-value evidence that passes the pre-registered gates.

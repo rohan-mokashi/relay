@@ -1,4 +1,4 @@
-# Relay Private Alpha candidate
+# Relay Open Alpha candidate
 
 Relay is a local-first MCP service for explicit, auditable project-context handoffs between
 ChatGPT Work and Codex. It stores only the structured project capsule a caller deliberately
@@ -6,9 +6,21 @@ submits. It does not read chats, synchronize private memories, control Codex, ru
 commands, or fetch artifact URLs.
 
 The v0.1 local continuity proof, v0.2 production foundation, and v0.3 independent-client gate are
-complete. This `0.4.0-alpha.2` candidate adds reproducible onboarding, diagnostics, packaging,
-aggregate-only study metrics, and operator/support gates without changing the nine-tool product
-contract. It does not provision hosted infrastructure or put workflow orchestration inside Relay.
+complete. This `0.4.0-alpha.3` candidate adds publicly recruited Open Alpha intake and support to
+the reproducible onboarding, diagnostics, packaging, and aggregate-only evidence path without
+changing the nine-tool product contract. It does not provision hosted infrastructure or put
+workflow orchestration inside Relay.
+
+## Join the Open Alpha
+
+Relay is recruiting 10–20 developers from the public community for a bounded Windows-first study.
+Start with [docs/open-alpha/README.md](docs/open-alpha/README.md), then use the repository's
+structured **Join Relay Open Alpha** form. Applications and result issues are public; never submit
+credentials, private project content, private URLs, or confidential details.
+
+This is experimental local software, not a production-ready Public Beta. The source release runs
+on the tester's machine and the development-authenticated server must not be exposed publicly.
+Security concerns use the private route in [SECURITY.md](SECURITY.md), not a public issue.
 
 ## Architecture
 
@@ -60,7 +72,7 @@ The verifier runs lint, formatting, strict type checking, the production build, 
 migration checks, portable-client and plugin metadata checks, all test projects, repository secret
 scanning, the Private Alpha readiness check, and the dependency audit.
 
-For a Private Alpha checkout or release bundle, the one-command local setup is:
+For an Open Alpha checkout or release bundle, the one-command local setup is:
 
 ```powershell
 node scripts/private-alpha-setup.mjs
@@ -107,6 +119,7 @@ distributed abuse controls, and a dedicated privacy review. See
 The supplied root specifications remain the product authority. Start with
 [START_HERE.md](START_HERE.md) and follow the read order in [AGENTS.md](AGENTS.md).
 
-The current milestone is [PRIVATE_ALPHA_SPEC.md](PRIVATE_ALPHA_SPEC.md). Private Alpha entry is a
-repository readiness gate; actual alpha exit and any Public Beta work remain blocked until the
-10–20-person study meets the recorded value, safety, and repeat-usage thresholds.
+The current milestone is [OPEN_ALPHA_SPEC.md](OPEN_ALPHA_SPEC.md), which inherits every gate in
+[PRIVATE_ALPHA_SPEC.md](PRIVATE_ALPHA_SPEC.md). Public recruitment does not waive Alpha exit: any
+Public Beta work remains blocked until the 10–20-person study meets the recorded value, safety,
+support, and repeat-usage thresholds.

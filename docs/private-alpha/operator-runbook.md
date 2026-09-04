@@ -14,8 +14,9 @@
 
 ## Cohort operation
 
-- Invite 10–20 developers privately. Recruitment and any external communication require the
-  product owner's action; repository automation must not contact people.
+- Recruit 10–20 developers privately, or publicly under the additional controls in
+  `../../OPEN_ALPHA_SPEC.md`. Recruitment and external communication require the product owner's
+  action; repository automation must not contact people.
 - Assign each tester a random `participant_ref` matching `alpha_[a-z0-9]{8,24}`. Keep any mapping
   to real identity outside the repository and outside the metrics dataset.
 - Give every tester the ZIP/checksum pair, [tester-quickstart.md](tester-quickstart.md), the support

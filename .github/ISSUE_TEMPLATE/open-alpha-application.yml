@@ -1,0 +1,74 @@
+name: Join Relay Open Alpha
+description: Apply for the bounded Windows-first Relay evaluation.
+title: "[Open Alpha application]: "
+labels:
+  - open-alpha-application
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue and your GitHub username are public. Do not include client work, private repository details, credentials, tokens, private URLs, or confidential information. Applications do not guarantee enrollment.
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Windows version
+      description: Windows is the currently verified Open Alpha path.
+      options:
+        - Windows 11
+        - Windows 10
+        - Another operating system (not currently enrolled)
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime readiness
+      description: Can you run Node.js 24 and pnpm 11 locally?
+      options:
+        - "Yes"
+        - "No"
+        - "Unsure"
+    validations:
+      required: true
+  - type: dropdown
+    id: clients
+    attributes:
+      label: Two-client path
+      description: Which verified pair can you use for the handoff exercise?
+      options:
+        - Visual Studio Code and Codex
+        - Visual Studio Code and ChatGPT Work
+        - Codex and ChatGPT Work
+        - I do not currently have two compatible clients
+    validations:
+      required: true
+  - type: dropdown
+    id: time
+    attributes:
+      label: Study availability
+      description: Can you spend approximately 20–30 minutes on initial setup and the first handoff?
+      options:
+        - "Yes"
+        - "No"
+        - "Unsure"
+    validations:
+      required: true
+  - type: textarea
+    id: intended-use
+    attributes:
+      label: Non-confidential use case
+      description: In one or two public-safe sentences, what kind of project handoff would you test?
+      placeholder: A small synthetic TypeScript project moving from planning to implementation.
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Alpha acknowledgements
+      options:
+        - label: I understand this is experimental local software and not a production-ready Public Beta.
+          required: true
+        - label: I will use synthetic or non-confidential context and will not expose a development server publicly.
+          required: true
+        - label: I understand that application and result issues are public.
+          required: true

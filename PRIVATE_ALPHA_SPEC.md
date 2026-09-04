@@ -7,8 +7,9 @@ approximately 10–20 developers. An unfamiliar tester should reach a working au
 connection in under ten minutes, exercise explicit cross-client continuity, and provide comparable
 outcome data without sending project content or credentials to Relay telemetry.
 
-This milestone prepares and gates the study. It does not claim that the study has run, recruit
-participants, operate public infrastructure, or authorize Public Beta.
+This milestone prepares and gates the study. It does not claim that the study has run, operate
+public infrastructure, or authorize Public Beta. Public recruitment may occur later under the
+additional controls in `OPEN_ALPHA_SPEC.md` without changing these thresholds.
 
 ## Scope
 
