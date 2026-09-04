@@ -16,9 +16,9 @@ const findOnPath = (names) => {
   return undefined;
 };
 
-const findWindowsCodeCli = () => {
+const windowsCodeInstallations = () => {
   const pathWrapper = findOnPath(["code.cmd"]);
-  const installations = [
+  return [
     pathWrapper ? dirname(dirname(pathWrapper)) : undefined,
     process.env.LOCALAPPDATA
       ? join(process.env.LOCALAPPDATA, "Programs", "Microsoft VS Code")
@@ -28,13 +28,44 @@ const findWindowsCodeCli = () => {
       ? join(process.env["ProgramFiles(x86)"], "Microsoft VS Code")
       : undefined,
   ].filter(Boolean);
-  for (const installation of installations) {
+};
+
+const findWindowsCodeCli = () => {
+  for (const installation of windowsCodeInstallations()) {
     const executable = join(installation, "Code.exe");
     if (!existsSync(executable)) continue;
     for (const entry of readdirSync(installation, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
       const cli = join(installation, entry.name, "resources", "app", "out", "cli.js");
       if (existsSync(cli)) return { executable, cli };
+    }
+  }
+  return undefined;
+};
+
+const findBundledCopilot = () => {
+  if (process.platform !== "win32") return undefined;
+  for (const installation of windowsCodeInstallations()) {
+    if (!existsSync(installation)) continue;
+    for (const entry of readdirSync(installation, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const packagePath = join(
+        installation,
+        entry.name,
+        "resources",
+        "app",
+        "extensions",
+        "copilot",
+        "package.json",
+      );
+      if (!existsSync(packagePath)) continue;
+      const metadata = JSON.parse(readFileSync(packagePath, "utf8"));
+      if (
+        metadata.publisher?.toLowerCase() === "github" &&
+        metadata.name?.toLowerCase() === "copilot-chat"
+      ) {
+        return metadata.version;
+      }
     }
   }
   return undefined;
@@ -109,13 +140,18 @@ if (installed?.status !== 0) {
       .map((value) => value.trim().toLowerCase())
       .filter(Boolean),
   );
+  const bundledCopilotVersion = findBundledCopilot();
   const copilotInstalled =
-    extensionIds.has("github.copilot") || extensionIds.has("github.copilot-chat");
+    extensionIds.has("github.copilot") ||
+    extensionIds.has("github.copilot-chat") ||
+    Boolean(bundledCopilotVersion);
   record(
     copilotInstalled ? "PASS" : "PENDING",
     "independent VS Code agent",
     copilotInstalled
-      ? "GitHub Copilot agent extension is installed; sign-in is not checked"
+      ? bundledCopilotVersion
+        ? `GitHub Copilot ${bundledCopilotVersion} is bundled with VS Code; sign-in is not checked`
+        : "GitHub Copilot agent extension is installed; sign-in is not checked"
       : "no GitHub Copilot agent extension detected; provider selection/install requires operator approval",
   );
 }
