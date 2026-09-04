@@ -5,14 +5,15 @@
 Prove that Relay's existing MCP contract works from a second, independently implemented MCP
 client without adding client-specific product behavior. The selected v0.3 client is Visual Studio
 Code because it is installed in the development environment and supports standard MCP stdio
-servers through a portable workspace configuration.
+servers through its native workspace configuration and the portable Agent Host configuration.
 
 v0.3 is an interoperability milestone. It is not the Private Alpha, a workflow orchestrator, or a
 self-prompting system.
 
 ## Scope
 
-- Provide a portable root `.mcp.json` that Visual Studio Code and compatible agent hosts can use.
+- Provide `.vscode/mcp.json` for the Visual Studio Code workspace host and a matching root
+  `.mcp.json` for portable Agent Host compatibility.
 - Launch the existing trusted local stdio adapter with repository-local dependencies.
 - Expose the same nine tools and strict schemas already used by ChatGPT Work and Codex.
 - Store Visual Studio Code-created records in the same configured database and principal scope.
@@ -29,8 +30,8 @@ self-prompting system.
 
 ## Security and portability constraints
 
-- The portable client configuration contains no bearer token, API key, credential, or fixed user
-  identity.
+- Neither checked-in client configuration contains a bearer token, API key, credential, or fixed
+  user identity.
 - The local stdio adapter still fails closed unless `RELAY_TUNNEL_PRINCIPAL` is supplied by the
   operator's ignored `.env` file or process environment.
 - `RELAY_DATABASE_PATH` and `RELAY_TUNNEL_PRINCIPAL` must match the other local Relay surfaces
@@ -42,9 +43,9 @@ self-prompting system.
 
 ## Acceptance criteria
 
-1. The checked-in root `.mcp.json` is valid portable MCP configuration and contains no secret.
-2. A fresh process launched from that configuration discovers exactly the documented nine Relay
-   tools.
+1. The checked-in `.vscode/mcp.json` and root `.mcp.json` are valid, match, and contain no secret.
+2. A fresh process launched from the Visual Studio Code workspace configuration discovers exactly
+   the documented nine Relay tools.
 3. That process can create a project and handoff, terminate, restart, and retrieve the same state
    through the real stdio transport.
 4. The real Visual Studio Code agent host starts and trusts the configured Relay server, discovers

@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "relay": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./node_modules/tsx/dist/cli.mjs", "apps/mcp-server/src/stdio.ts"],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  }
+}

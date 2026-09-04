@@ -93,6 +93,13 @@ if (existsSync(portableConfigPath)) {
   record("FAIL", "portable MCP configuration", ".mcp.json is missing");
 }
 
+const workspaceConfigPath = join(process.cwd(), ".vscode", "mcp.json");
+if (existsSync(workspaceConfigPath)) {
+  record("PASS", "VS Code workspace MCP configuration", ".vscode/mcp.json is present");
+} else {
+  record("FAIL", "VS Code workspace MCP configuration", ".vscode/mcp.json is missing");
+}
+
 const launcherPath = join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs");
 if (existsSync(launcherPath)) {
   record("PASS", "repository dependencies", "the configured tsx launcher is installed");

@@ -67,7 +67,8 @@ scanning, and the dependency audit.
 - ChatGPT Work: use Secure MCP Tunnel with the trusted stdio entry point. The Windows runbook
   includes a checksum-verifying, repository-local installer for the public tunnel client. See
   [docs/setup-windows.md](docs/setup-windows.md#connect-chatgpt-work-through-secure-mcp-tunnel).
-- Visual Studio Code: open the repository and use the portable root `.mcp.json` with
+- Visual Studio Code: open the repository and use `.vscode/mcp.json`; the matching root
+  `.mcp.json` supports the portable Agent Host path. Follow
   [docs/setup-vscode.md](docs/setup-vscode.md). The observed real-host procedure in
   [docs/v0.3-interoperability-acceptance.md](docs/v0.3-interoperability-acceptance.md) is the v0.3
   release gate; current evidence is tracked in

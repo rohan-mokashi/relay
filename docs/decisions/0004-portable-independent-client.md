@@ -11,13 +11,14 @@ MCP client before Private Alpha so the product is demonstrably based on the prot
 on behavior unique to those OpenAI surfaces.
 
 Visual Studio Code is already installed in the development environment and implements MCP stdio
-servers independently. Its workspace configuration can be expressed in a root `.mcp.json`, which
-is also more portable than a client-specific settings file.
+servers independently. The VS Code workspace host reads `.vscode/mcp.json`; its Agent Host also
+supports a portable root `.mcp.json`.
 
 ## Decision
 
 - Use Visual Studio Code as the independent client for v0.3 acceptance.
-- Check in a root `.mcp.json` that launches the existing Relay stdio entry point with the
+- Check in `.vscode/mcp.json` for native workspace discovery and a matching root `.mcp.json` for
+  portable Agent Host discovery. Both launch the existing Relay stdio entry point with the
   repository-local `tsx` installation.
 - Load local principal and database settings from the ignored workspace `.env`; do not place an
   identity or credential in the configuration.
@@ -28,8 +29,8 @@ is also more portable than a client-specific settings file.
 
 ## Consequences
 
-- A checkout with installed dependencies can expose Relay to Visual Studio Code without copying a
-  machine-specific executable path.
+- A checkout with installed dependencies can expose Relay to both Visual Studio Code execution
+  paths without copying a machine-specific executable path.
 - The same database and principal can be shared with other local Relay surfaces for continuity
   testing.
 - Local stdio remains a trusted development path. Hosted multi-user use must continue through the

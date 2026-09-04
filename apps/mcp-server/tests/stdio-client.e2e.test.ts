@@ -22,6 +22,9 @@ const workspaceVariable = `$${"{workspaceFolder}"}`;
 const portableConfiguration = JSON.parse(
   readFileSync(resolve(workspaceRoot, ".mcp.json"), "utf8"),
 ) as { servers: { relay: PortableServerConfig } };
+const vscodeConfiguration = JSON.parse(
+  readFileSync(resolve(workspaceRoot, ".vscode/mcp.json"), "utf8"),
+) as { servers: { relay: PortableServerConfig } };
 
 const expectedToolNames = [
   "create_checkpoint",
@@ -39,7 +42,8 @@ const structured = (result: unknown): Record<string, unknown> =>
   (result as { structuredContent: Record<string, unknown> }).structuredContent;
 
 const connectThroughPortableConfig = async (databasePath: string): Promise<Client> => {
-  const configured = portableConfiguration.servers.relay;
+  expect(vscodeConfiguration.servers.relay).toEqual(portableConfiguration.servers.relay);
+  const configured = vscodeConfiguration.servers.relay;
   expect(configured.type).toBe("stdio");
   expect(configured.cwd).toBe(workspaceVariable);
   expect(configured.envFile).toBe(`${workspaceVariable}/.env`);
@@ -61,7 +65,7 @@ const connectThroughPortableConfig = async (databasePath: string): Promise<Clien
   return client;
 };
 
-describe("Relay portable independent-client configuration", () => {
+describe("Relay Visual Studio Code independent-client configuration", () => {
   it("discovers, writes, restarts, and reads through the configured stdio process", async () => {
     const directory = mkdtempSync(join(tmpdir(), "relay-vscode-e2e-"));
     const databasePath = join(directory, "relay.db");
