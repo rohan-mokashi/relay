@@ -22,6 +22,9 @@ This is experimental local software, not a production-ready Public Beta. The sou
 on the tester's machine and the development-authenticated server must not be exposed publicly.
 Security concerns use the private route in [SECURITY.md](SECURITY.md), not a public issue.
 
+Relay is licensed under the [Apache License 2.0](LICENSE). Attribution is recorded in
+[NOTICE](NOTICE).
+
 ## Architecture
 
 | Boundary | Implementation |
