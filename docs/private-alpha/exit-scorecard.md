@@ -5,12 +5,12 @@
 | Gate | Status | Evidence |
 | --- | --- | --- |
 | v0.3 independent-client interoperability | Passed | `docs/v0.3-acceptance-record.md` |
-| One-command non-destructive local setup | Pending final verification | `scripts/private-alpha-setup.mjs` and `pnpm alpha:check` |
-| Redacted authenticated diagnostics | Pending final verification | `pnpm alpha:doctor` |
-| Reproducible commit-addressed package | Pending final bundle | `pnpm alpha:bundle` |
-| Tester/operator/support/incident runbooks | Pending final verification | `docs/private-alpha/` |
-| Aggregate-only metrics path | Pending final verification | `pnpm alpha:metrics -- docs/private-alpha/alpha-observations.example.jsonl` |
-| Full inherited release gate | Pending final verification | `pnpm verify` on the entry commit |
+| One-command non-destructive local setup | Passed | A checksum-verified fresh extraction of `0.4.0-alpha.2` installed 161 locked packages, generated an unprinted ignored credential, migrated SQLite, and completed the doctor; `pnpm alpha:check` also verifies existing `.env` preservation |
+| Redacted authenticated diagnostics | Passed | `pnpm alpha:doctor` checked Node/pnpm, configuration, nine-tool discovery, and an authenticated read in under six seconds without stored content or credentials |
+| Reproducible commit-addressed package | Passed | `pnpm alpha:bundle` produced a commit-addressed ZIP, SHA-256 file, and JSON release record; the checksum and extracted setup were verified before entry |
+| Tester/operator/support/incident runbooks | Passed | `pnpm alpha:check` verified all required `docs/private-alpha/` artifacts are present and non-empty |
+| Aggregate-only metrics path | Passed | The strict parser and four unit tests passed; the synthetic 10-row fixture produced aggregate output with no participant references and `value_gate_passed: true` |
+| Full inherited release gate | Passed | Lint, format, typecheck, build, SQLite/PostgreSQL migrations, client/plugin/Alpha checks, 12 test files and 67 tests, secret scan, and high-severity dependency audit passed; the registry request required a transport retry |
 
 ## Exit evidence
 
