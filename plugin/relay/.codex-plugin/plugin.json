@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "0.3.0",
+  "version": "0.4.0-alpha.1",
   "description": "Explicit, durable project-context handoffs between ChatGPT Work and Codex.",
   "author": {
     "name": "Relay contributors"

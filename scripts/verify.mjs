@@ -14,6 +14,7 @@ const checks = [
   "migrate:check",
   "clients:check",
   "plugin:check",
+  "alpha:check",
   "test",
   "secret:scan",
   "audit",

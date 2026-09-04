@@ -3,8 +3,8 @@
 ## Mission
 
 Maintain Relay's secure, explicit, bidirectional project-context handoff and evolve the completed
-v0.2 production foundation into the v0.3 independent-client interoperability release defined in
-`V0_3_SPEC.md`.
+v0.3 interoperability milestone into the measurable, bounded Private Alpha readiness release
+defined in `PRIVATE_ALPHA_SPEC.md`.
 
 ## Read order
 
@@ -19,6 +19,7 @@ Before planning or changing code, read completely:
 7. `EVALS_AND_ACCEPTANCE_TESTS.md`
 8. `V0_2_SPEC.md`
 9. `V0_3_SPEC.md`
+10. `PRIVATE_ALPHA_SPEC.md`
 
 ## Required behavior
 
@@ -72,6 +73,8 @@ verified rather than guessed.
 
 ## Definition of done
 
-The v0.3 milestone is not complete merely because the MCP server starts or an SDK harness passes.
-Completion requires the inherited verification suite plus the real Visual Studio Code and
-cross-client run defined in `docs/v0.3-interoperability-acceptance.md`.
+Private Alpha entry requires the inherited verification suite, a reproducible source bundle,
+sub-10-minute onboarding tooling, redacted diagnostics, aggregate-only value metrics, and the
+support/incident gates in `PRIVATE_ALPHA_SPEC.md`. Private Alpha exit is separate: do not claim it
+or begin Public Beta work until 10–20 real participants provide repeat-usage and continuation-value
+evidence that passes the pre-registered gates.

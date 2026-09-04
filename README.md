@@ -1,14 +1,14 @@
-# Relay v0.3
+# Relay Private Alpha candidate
 
 Relay is a local-first MCP service for explicit, auditable project-context handoffs between
 ChatGPT Work and Codex. It stores only the structured project capsule a caller deliberately
 submits. It does not read chats, synchronize private memories, control Codex, run repository
 commands, or fetch artifact URLs.
 
-The v0.1 local continuity proof and v0.2 production foundation remain intact. v0.3 adds a portable
-Visual Studio Code MCP configuration and independent-client acceptance gate without changing the
-nine-tool product contract. It does not provision or operate an identity provider, database, or
-public deployment, and it does not put workflow orchestration inside Relay.
+The v0.1 local continuity proof, v0.2 production foundation, and v0.3 independent-client gate are
+complete. This `0.4.0-alpha.1` candidate adds reproducible onboarding, diagnostics, packaging,
+aggregate-only study metrics, and operator/support gates without changing the nine-tool product
+contract. It does not provision hosted infrastructure or put workflow orchestration inside Relay.
 
 ## Architecture
 
@@ -58,7 +58,18 @@ pnpm verify
 
 The verifier runs lint, formatting, strict type checking, the production build, deterministic
 migration checks, portable-client and plugin metadata checks, all test projects, repository secret
-scanning, and the dependency audit.
+scanning, the Private Alpha readiness check, and the dependency audit.
+
+For a Private Alpha checkout or release bundle, the one-command local setup is:
+
+```powershell
+node scripts/private-alpha-setup.mjs
+```
+
+It installs the locked dependency graph, creates an ignored random local credential only when
+`.env` is absent, migrates the local database, and runs a redacted MCP diagnostic. Continue with
+[docs/private-alpha/tester-quickstart.md](docs/private-alpha/tester-quickstart.md). Operators start
+with [docs/private-alpha/operator-runbook.md](docs/private-alpha/operator-runbook.md).
 
 ## Development integration paths
 
@@ -95,3 +106,7 @@ distributed abuse controls, and a dedicated privacy review. See
 
 The supplied root specifications remain the product authority. Start with
 [START_HERE.md](START_HERE.md) and follow the read order in [AGENTS.md](AGENTS.md).
+
+The current milestone is [PRIVATE_ALPHA_SPEC.md](PRIVATE_ALPHA_SPEC.md). Private Alpha entry is a
+repository readiness gate; actual alpha exit and any Public Beta work remain blocked until the
+10–20-person study meets the recorded value, safety, and repeat-usage thresholds.
