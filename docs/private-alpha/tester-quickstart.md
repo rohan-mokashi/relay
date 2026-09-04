@@ -1,6 +1,6 @@
-# Private Alpha tester quickstart
+# Alpha tester quickstart
 
-This path is for invited developers using the local SQLite/dev-auth topology. It keeps credentials
+This path is for enrolled developers using the local SQLite/dev-auth topology. It keeps credentials
 and project content on the tester's machine. Do not use it as a public or internet-facing service.
 
 ## Reach a working connection in under ten minutes

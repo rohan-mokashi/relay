@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { extname, relative, resolve } from "node:path";
 
 const root = process.cwd();
+const gitSafeDirectory = root.replaceAll("\\", "/");
 const ignoredDirectories = new Set([
   ".git",
   ".npm-cache",
@@ -35,7 +36,10 @@ const patterns = [
 ];
 
 const tracked = new Set(
-  execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8" })
+  execFileSync("git", ["-c", `safe.directory=${gitSafeDirectory}`, "ls-files"], {
+    cwd: root,
+    encoding: "utf8",
+  })
     .split(/\r?\n/)
     .filter(Boolean)
     .map((file) => file.replaceAll("\\", "/")),

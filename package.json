@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "0.4.0-alpha.2",
+  "version": "0.4.0-alpha.3",
   "private": true,
   "description": "Explicit, auditable project-context handoffs across MCP clients.",
   "type": "module",
@@ -35,6 +35,7 @@
     "alpha:metrics": "tsx scripts/private-alpha-metrics.ts",
     "alpha:bundle": "node scripts/private-alpha-bundle.mjs",
     "alpha:check": "node scripts/private-alpha-check.mjs",
+    "open-alpha:check": "node scripts/open-alpha-check.mjs",
     "secret:scan": "node scripts/secret-scan.mjs",
     "audit": "pnpm audit --audit-level high",
     "verify": "node scripts/verify.mjs"
